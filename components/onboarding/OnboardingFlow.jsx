@@ -5,7 +5,7 @@ import CreateAccountScreen from './CreateAccountScreen.jsx';
 import AddChildScreen from './AddChildScreen.jsx';
 import HMOCoverageScreen from './HMOCoverageScreen.jsx';
 import InviteFamilyScreen from './InviteFamilyScreen.jsx';
-import TopNavBar from '@/components/navigation/TopNavBar.jsx';
+import AppNavbar from '@/components/navigation/AppNavbar.jsx';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import './onboarding.css';
 
@@ -459,7 +459,7 @@ export default function OnboardingFlow({ onComplete, onInitialBack }) {
 
   return (
     <div className="onboarding-flow">
-      <TopNavBar
+      <AppNavbar
         variant="inner"
         transparent={true}
         title={

@@ -1,7 +1,6 @@
 /* ── Onboarding Flow ──────────────────────────────────────── */
 
 .onboarding-flow {
-  background: linear-gradient(180deg, #fffdf9 0%, var(--dampi-cream) 100%);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -457,10 +456,6 @@
 /* ── Back Button ── */
 /* ── Mobile ── */
 @media (max-width: 640px) {
-  .onboarding-flow {
-    padding: 16px;
-  }
-
   .onboarding-progress {
     margin: 0;
   }

@@ -1,7 +1,6 @@
 /* ── Auth Landing Screen ────────────────────────────────────── */
 
 .auth-landing {
-  background: linear-gradient(180deg, #f8fafa 0%, #f0f5f4 100%);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -82,7 +81,6 @@
 /* ── Login Screen ───────────────────────────────────────────── */
 
 .login-screen {
-  background: linear-gradient(180deg, #f8fafa 0%, #f0f5f4 100%);
   min-height: 100vh;
   display: flex;
   flex-direction: column;

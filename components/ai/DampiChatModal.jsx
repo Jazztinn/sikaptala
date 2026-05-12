@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from "react"
 import { X, Menu, ChevronDown, Plus, Loader2, Send, Stethoscope, CalendarPlus, ShieldCheck, Pill, ListChecks, XCircle, MessageSquare, Trash2, Pencil, Check, Square, Mic, MicOff } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { callDampiChat, streamDampiChat, transcribeDampiAudio } from "@/services/ai/dampiApi";
+import { callDampiChat, streamDampiChat, transcribeDampiAudio } from "@/lib/dampiApi.js";
 import {
   appendAiChatMessage,
   createLocalChat,

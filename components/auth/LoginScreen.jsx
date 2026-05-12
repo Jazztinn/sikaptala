@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Mail, Lock } from 'lucide-react';
-import TopNavBar from '@/components/navigation/TopNavBar.jsx';
+import AppNavbar from '@/components/navigation/AppNavbar.jsx';
 import { getSupabaseBrowserClient } from '@/lib/supabase-compat';
 import SocialAuthButtons from './SocialAuthButtons.jsx';
 import './auth.css';
@@ -32,7 +32,7 @@ export default function LoginScreen({ onBack }) {
 
   return (
     <div className="login-screen">
-      <TopNavBar variant="inner" transparent title="Sign In" onBack={onBack} />
+      <AppNavbar variant="inner" transparent title="Sign In" onBack={onBack} />
 
       <div className="login-screen__content">
         <div className="login-screen__header">
