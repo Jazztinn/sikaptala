@@ -1,9 +1,16 @@
-import { SignupForm } from "@/components/auth/signup-form";
+"use client";
+
+import { useRouter } from "next/navigation";
+
+import AuthLandingScreen from "@/components/auth/AuthLandingScreen.jsx";
 
 export default function SignupPage() {
+  const router = useRouter();
+
   return (
-    <main className="px-4 py-12 lg:px-8">
-      <SignupForm />
-    </main>
+    <AuthLandingScreen
+      onNew={() => router.push("/onboarding")}
+      onExisting={() => router.push("/login")}
+    />
   );
 }

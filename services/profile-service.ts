@@ -5,11 +5,18 @@ import type { OnboardingDraft, ProfileRecord } from "@/types";
 type SupabaseLike = Awaited<ReturnType<typeof import("@/lib/supabase/server").createSupabaseServerClient>>;
 
 function mapProfile(row: Record<string, unknown>): ProfileRecord {
+  const displayName =
+    String(row.display_name ?? "").trim() || String(row.full_name ?? "").trim();
+
   return {
     id: String(row.id),
-    displayName: String(row.display_name ?? ""),
+    displayName,
+    fullName: String(row.full_name ?? displayName),
     username: row.username ? String(row.username) : null,
     avatarUrl: row.avatar_url ? String(row.avatar_url) : null,
+    email: row.email ? String(row.email) : null,
+    phone: row.phone ? String(row.phone) : null,
+    discoverable: row.discoverable === undefined ? true : Boolean(row.discoverable),
     outcome: row.outcome ? String(row.outcome) : null,
     intent: row.intent ? String(row.intent) : null,
     personalization: row.personalization ? String(row.personalization) : null,
@@ -23,9 +30,15 @@ export async function ensureProfile(
   supabase: SupabaseLike,
   user: Pick<User, "id" | "email">
 ) {
+  const defaultName = user.email?.split("@")[0] ?? "Parent or Guardian";
+
   const defaults = {
     id: user.id,
-    display_name: user.email?.split("@")[0] ?? "Teammate"
+    display_name: defaultName,
+    full_name: defaultName,
+    email: user.email ?? null,
+    phone: "",
+    discoverable: true
   };
 
   await supabase.from("profiles").upsert(defaults, {
@@ -60,6 +73,7 @@ export async function updateProfile(
     .from("profiles")
     .update({
       display_name: input.displayName,
+      full_name: input.displayName,
       username: input.username || null,
       avatar_url: input.avatarUrl || null,
       intent: input.intent || null,

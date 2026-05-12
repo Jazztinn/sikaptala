@@ -1,0 +1,179 @@
+@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  font-family: "Work Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Dampi Brand Colors */
+  --dampi-sage: #92BBB3;
+  --dampi-cream: #FFFAF6;
+  --dampi-teal: #4D736C;
+  --dampi-warm: #EDA16D;
+  --dampi-text: #2A3B38;
+  --dampi-text-muted: #6B8580;
+  --dampi-emergency: #E8897A;
+  --dampi-white: #FFFFFF;
+
+  /* DESIGN.md aliases */
+  --brand: var(--dampi-sage);
+  --primary: var(--dampi-teal);
+  --primary-hover: #3A5A54;
+  --accent: var(--dampi-warm);
+  --danger: var(--dampi-emergency);
+  --bg: var(--dampi-cream);
+  --card: var(--dampi-white);
+  --text: var(--dampi-text);
+  --text-muted: var(--dampi-text-muted);
+  --sage-12: rgba(146, 187, 179, 0.12);
+  --sage-15: rgba(146, 187, 179, 0.15);
+  --sage-20: rgba(146, 187, 179, 0.20);
+  --sage-35: rgba(146, 187, 179, 0.35);
+  --teal-10: rgba(77, 115, 108, 0.10);
+  --warm-15: rgba(237, 161, 109, 0.15);
+  --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-sm: 0 2px 8px rgba(77, 115, 108, 0.12);
+  --shadow-md: 0 4px 12px rgba(77, 115, 108, 0.15);
+  --shadow-lg: 0 8px 24px rgba(77, 115, 108, 0.20);
+  --shadow-xl: 0 12px 32px rgba(77, 115, 108, 0.30);
+  --shadow-cta: 0 4px 12px rgba(77, 115, 108, 0.25);
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+
+  /* Legacy aliases (keep for any existing code) */
+  --bg-low: #F0EBE3;
+  --bg-dim: #E8E0D6;
+  --brown: #5b3424;
+  --brown-m: #9b6f57;
+  --orange: #EDA16D;
+  --orange-l: #f7c48f;
+  --orange-m: #e68c44;
+  --outline-v: rgba(77, 115, 108, 0.14);
+  --primary-color: #4D736C;
+  --primary-color-hover: #3a5a54;
+
+  color: var(--dampi-text);
+  background: #fff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  background: #fff;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+#root {
+  position: relative;
+}
+
+.dampi-app {
+  position: relative;
+  min-height: 100vh;
+  background: #fff;
+}
+
+.app-state {
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  color: var(--dampi-text-muted);
+  font-weight: 700;
+}
+
+.app-error {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2000;
+  max-width: 398px;
+  margin: 0 auto;
+  border-radius: 14px;
+  background: #fff;
+  color: #c0392b;
+  box-shadow: var(--shadow-lg);
+  padding: 12px 14px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.splash-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #f8fafa 0%, #f0f5f4 100%);
+  height: 100%;
+  width: 100%;
+}
+
+.splash-logo {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  /* Glassmorphism/Emboss effect directly on SVG alpha channel */
+  filter: 
+    drop-shadow(0 8px 16px rgba(77, 115, 108, 0.12))
+    drop-shadow(2px 2px 1px rgba(0, 0, 0, 0.05))
+    drop-shadow(-2px -2px 1px rgba(255, 255, 255, 0.8));
+  animation: splashRaise 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes splashRaise {
+  0% {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

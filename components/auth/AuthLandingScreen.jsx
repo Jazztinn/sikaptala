@@ -1,0 +1,31 @@
+import SocialAuthButtons from './SocialAuthButtons.jsx';
+import './auth.css';
+
+export default function AuthLandingScreen({ onNew, onExisting }) {
+  return (
+    <div className="auth-landing">
+      <div className="auth-landing__content">
+        <div className="auth-landing__header">
+          <h1 className="auth-landing__title brand-font">dampi</h1>
+        </div>
+
+        <div className="auth-landing__actions">
+          <button className="onboarding-cta" onClick={onNew}>
+            I'm New
+          </button>
+          <button className="onboarding-secondary" onClick={onExisting}>
+            I Already Have an Account
+          </button>
+        </div>
+
+        <div className="login-divider">
+          <span className="login-divider__line" />
+          <span className="login-divider__text">or</span>
+          <span className="login-divider__line" />
+        </div>
+
+        <SocialAuthButtons action="Continue" />
+      </div>
+    </div>
+  );
+}

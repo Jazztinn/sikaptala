@@ -1,0 +1,483 @@
+import { useEffect, useState } from 'react';
+import WelcomeScreen from './WelcomeScreen.jsx';
+import TryDampiScreen from './TryDampiScreen.jsx';
+import CreateAccountScreen from './CreateAccountScreen.jsx';
+import AddChildScreen from './AddChildScreen.jsx';
+import HMOCoverageScreen from './HMOCoverageScreen.jsx';
+import InviteFamilyScreen from './InviteFamilyScreen.jsx';
+import TopNavBar from '@/components/navigation/TopNavBar.jsx';
+import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
+import './onboarding.css';
+
+const PENDING_ONBOARDING_KEY = 'dampi.pendingOnboarding';
+
+function getAuthDisplayName(user) {
+  return (
+    user?.user_metadata?.full_name ||
+    user?.user_metadata?.name ||
+    user?.user_metadata?.display_name ||
+    ''
+  );
+}
+
+function getPendingOnboarding() {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  try {
+    const pending = window.localStorage.getItem(PENDING_ONBOARDING_KEY);
+    return pending ? JSON.parse(pending) : null;
+  } catch {
+    return null;
+  }
+}
+
+function setPendingOnboarding(data) {
+  const { password: _password, ...safeData } = data;
+
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem(PENDING_ONBOARDING_KEY, JSON.stringify(safeData));
+  }
+
+  return safeData;
+}
+
+function clearPendingOnboarding() {
+  if (typeof window !== 'undefined') {
+    window.localStorage.removeItem(PENDING_ONBOARDING_KEY);
+  }
+}
+
+export default function OnboardingFlow({ onComplete, onInitialBack }) {
+  const [direction, setDirection] = useState('next');
+  const [step, setStep] = useState(() => {
+    if (typeof window === 'undefined') {
+      return 0;
+    }
+
+    const saved = window.localStorage.getItem('dampi.onboardingStep');
+    const parsed = saved ? parseInt(saved, 10) : 0;
+    return Number.isFinite(parsed) ? Math.min(Math.max(parsed, 0), 5) : 0;
+  });
+  const [formData, setFormData] = useState(() => {
+    if (typeof window === 'undefined') {
+      return {
+        fullName: '',
+        phone: '',
+        email: '',
+        password: '',
+        childName: '',
+        childDOB: '',
+        childGender: '',
+        hmoHasCoverage: '',
+        hmoProviderName: '',
+        hmoBenefitsTier: '',
+        hmoBenefitsNotes: '',
+        familyEmail: '',
+        discoverable: true,
+      };
+    }
+
+    const saved = window.localStorage.getItem('dampi.onboardingData');
+    return saved ? JSON.parse(saved) : {
+      fullName: '',
+      phone: '',
+      email: '',
+      password: '',
+      childName: '',
+      childDOB: '',
+      childGender: '',
+      hmoHasCoverage: '',
+      hmoProviderName: '',
+      hmoBenefitsTier: '',
+      hmoBenefitsNotes: '',
+      familyEmail: '',
+      discoverable: true,
+    };
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const [pendingConfirmation, setPendingConfirmation] = useState(null);
+  const [authUser, setAuthUser] = useState(null);
+
+  // Persist state changes
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.localStorage.setItem('dampi.onboardingStep', step.toString());
+  }, [step]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const { password: _pw, ...safeData } = formData;
+    window.localStorage.setItem('dampi.onboardingData', JSON.stringify(safeData));
+  }, [formData]);
+
+  const clearPersistence = () => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem('dampi.onboardingStep');
+      window.localStorage.removeItem('dampi.onboardingData');
+    }
+
+    clearPendingOnboarding();
+  };
+
+  useEffect(() => {
+    let active = true;
+
+    const loadAuthUser = async () => {
+      try {
+        const supabase = createSupabaseBrowserClient();
+        const { data, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        if (!active) return;
+
+        const user = data.session?.user || null;
+        setAuthUser(user);
+
+        if (user) {
+          setFormData((current) => ({
+            ...current,
+            fullName: current.fullName || getAuthDisplayName(user),
+            email: current.email || user.email || '',
+            password: '',
+          }));
+        }
+      } catch {
+        if (active) setAuthUser(null);
+      }
+    };
+
+    loadAuthUser();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const persistOnboardingAccount = async (supabase, user, data) => {
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .upsert({
+        id: user.id,
+        display_name: data.fullName.trim(),
+        full_name: data.fullName.trim(),
+        email: user.email || data.email.trim(),
+        phone: data.phone.trim(),
+        discoverable: data.discoverable !== false,
+      }, { onConflict: 'id' });
+
+    if (profileError) throw profileError;
+
+    const { data: existingChild, error: existingChildError } = await supabase
+      .from('children')
+      .select('*')
+      .eq('primary_guardian_id', user.id)
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (existingChildError) throw existingChildError;
+
+    const childPayload = {
+      primary_guardian_id: user.id,
+      full_name: data.childName.trim(),
+      date_of_birth: data.childDOB,
+      gender: data.childGender,
+    };
+
+    const childWrite = existingChild
+      ? supabase
+          .from('children')
+          .update(childPayload)
+          .eq('id', existingChild.id)
+          .select()
+          .single()
+      : supabase
+          .from('children')
+          .insert(childPayload)
+          .select()
+          .single();
+
+    const { data: child, error: childError } = await childWrite;
+
+    if (childError) throw childError;
+
+    const hasHmo = data.hmoHasCoverage === 'yes';
+    const hmoPayload = {
+      profile_id: user.id,
+      has_hmo: hasHmo,
+      provider_name: hasHmo ? data.hmoProviderName?.trim() || null : null,
+      benefits_tier: hasHmo ? data.hmoBenefitsTier?.trim() || null : null,
+      benefits_notes: hasHmo ? data.hmoBenefitsNotes?.trim() || null : null,
+    };
+
+    const { data: hmoCoverage, error: hmoError } = await supabase
+      .from('hmo_coverage')
+      .upsert(hmoPayload, { onConflict: 'profile_id' })
+      .select()
+      .single();
+
+    if (hmoError) throw hmoError;
+
+    const familyEmail = data.familyEmail?.trim() || '';
+    if (familyEmail) {
+      const { error: inviteError } = await supabase
+        .from('caregiver_invites')
+        .insert({
+          inviter_profile_id: user.id,
+          child_id: child.id,
+          invitee_email: familyEmail,
+        });
+
+      if (inviteError && inviteError.code !== '23505') throw inviteError;
+    }
+
+    const { data: profile, error: updateProfileError } = await supabase
+      .from('profiles')
+      .update({ onboarding_completed: true })
+      .eq('id', user.id)
+      .select()
+      .single();
+
+    if (updateProfileError) throw updateProfileError;
+
+    clearPersistence();
+    setPendingConfirmation(null);
+    onComplete && onComplete({ profile, child, hmoCoverage });
+    return true;
+  };
+
+  const resumeConfirmedOnboarding = async (pendingData = pendingConfirmation) => {
+    if (!pendingData) return false;
+
+    setIsSubmitting(true);
+    setSubmitError('');
+
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+
+      const user = sessionData.session?.user;
+      if (!user) {
+        setSubmitError('Confirm your email from the Supabase message, then return here to continue.');
+        return false;
+      }
+
+      if (pendingData.userId && pendingData.userId !== user.id) {
+        throw new Error('A different account is signed in. Sign out and open the confirmation link for this email.');
+      }
+
+      clearPendingOnboarding();
+      setPendingConfirmation(null);
+      setFormData((current) => ({ ...current, ...pendingData, password: '' }));
+      setStep(2);
+      setSubmitError('');
+      return true;
+    } catch (error) {
+      setSubmitError(error.message || 'Unable to finish onboarding.');
+      return false;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  useEffect(() => {
+    const pending = getPendingOnboarding();
+    if (!pending) return;
+
+    setPendingConfirmation(pending);
+    setFormData((current) => ({ ...current, ...pending }));
+    resumeConfirmedOnboarding(pending);
+  }, []);
+
+  const steps = [
+    { id: 'welcome', label: 'Welcome' },
+    { id: 'trydampi', label: 'Try Dampi' },
+    { id: 'account', label: 'Create Account' },
+    { id: 'child', label: 'Add Child' },
+    { id: 'hmo', label: 'HMO Coverage' },
+    { id: 'family', label: 'Invite Family' },
+  ];
+
+  const handleNext = async (newData = {}) => {
+    const nextData = { ...formData, ...newData };
+    setFormData(nextData);
+
+    if (step === 2) {
+      setIsSubmitting(true);
+      setSubmitError('');
+
+      try {
+        const supabase = createSupabaseBrowserClient();
+        const email = nextData.email.trim();
+
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) throw sessionError;
+
+        let user = sessionData.session?.user || null;
+        setAuthUser(user);
+
+        if (user?.email && user.email.toLowerCase() !== email.toLowerCase()) {
+          await supabase.auth.signOut();
+          user = null;
+          setAuthUser(null);
+        }
+
+        if (!user) {
+          const { data: authData, error: signUpError } = await supabase.auth.signUp({
+            email,
+            password: nextData.password,
+            options: {
+              emailRedirectTo: window.location.origin,
+            },
+          });
+
+          if (signUpError) throw signUpError;
+
+          if (!authData.session) {
+            const pendingData = setPendingOnboarding({
+              ...nextData,
+              userId: authData.user?.id,
+            });
+            setPendingConfirmation(pendingData);
+            return;
+          }
+        }
+      } catch (error) {
+        setSubmitError(error.message || 'Unable to create your account.');
+        return;
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
+
+    if (step < steps.length - 1) {
+      setDirection('next');
+      setStep(step + 1);
+    }
+  };
+
+  const handleBack = () => {
+    if (step > 0) {
+      setDirection('back');
+      setStep(step - 1);
+    }
+  };
+
+  const handleComplete = async (newData = {}) => {
+    const finalData = { ...formData, ...newData };
+    setIsSubmitting(true);
+    setSubmitError('');
+
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const email = finalData.email.trim();
+      const familyEmail = finalData.familyEmail?.trim() || '';
+
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+
+      const user = sessionData.session?.user || null;
+
+      if (user?.email && user.email.toLowerCase() !== email.toLowerCase()) {
+        throw new Error(`A different account is already signed in as ${user.email}.`);
+      }
+
+      if (!user) throw new Error('No active account session found. Create your account first.');
+      return await persistOnboardingAccount(supabase, user, { ...finalData, familyEmail });
+    } catch (error) {
+      setSubmitError(error.message || 'Unable to finish onboarding.');
+      return false;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const screens = [
+    <WelcomeScreen key="welcome" onNext={handleNext} />,
+    <TryDampiScreen key="trydampi" onNext={handleNext} />,
+    <CreateAccountScreen
+      key="account"
+      data={formData}
+      onNext={handleNext}
+      isSubmitting={isSubmitting}
+      submitError={step === 2 ? submitError : ''}
+      authenticatedEmail={authUser?.email || ''}
+    />,
+    <AddChildScreen key="child" data={formData} onNext={handleNext} />,
+    <HMOCoverageScreen key="hmo" data={formData} onNext={handleNext} />,
+    <InviteFamilyScreen
+      key="family"
+      data={formData}
+      onComplete={handleComplete}
+      isSubmitting={isSubmitting}
+      submitError={submitError}
+    />,
+  ];
+
+  if (pendingConfirmation) {
+    return (
+      <div className="onboarding-flow">
+        <div className="onboarding-screen">
+          <div className="onboarding-screen-content">
+            <div className="success-state">
+              <div className="success-icon">✓</div>
+              <h3>Confirm your email</h3>
+              <p>
+                We sent a confirmation link to {pendingConfirmation.email}. Open it in this browser,
+                then continue setup here.
+              </p>
+              {submitError && <span className="error-text">{submitError}</span>}
+              <button className="onboarding-cta" onClick={() => resumeConfirmedOnboarding()} disabled={isSubmitting}>
+                {isSubmitting ? 'Checking...' : 'I confirmed my email'}
+              </button>
+              <button
+                className="onboarding-secondary"
+                onClick={() => {
+                  clearPersistence();
+                  setPendingConfirmation(null);
+                  setSubmitError('');
+                }}
+                disabled={isSubmitting}
+              >
+                Use a different email
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="onboarding-flow">
+      <TopNavBar
+        variant="inner"
+        transparent={true}
+        title={
+          <div className="onboarding-progress">
+            {steps.map((s, i) => (
+              <div key={s.id} className={`onboarding-dot ${i <= step ? 'active' : ''}`} />
+            ))}
+          </div>
+        }
+        onBack={step > 0 ? handleBack : onInitialBack}
+      />
+
+      {/* Screen */}
+      <div className="onboarding-screen-wrapper">
+        <div key={step} className={`onboarding-screen slide-${direction}`}>
+          {screens[step]}
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -9,8 +9,12 @@ export type OnboardingDraft = {
 export type ProfileRecord = {
   id: string;
   displayName: string;
+  fullName: string;
   username: string | null;
   avatarUrl: string | null;
+  email: string | null;
+  phone: string | null;
+  discoverable: boolean;
   outcome: string | null;
   intent: string | null;
   personalization: string | null;
