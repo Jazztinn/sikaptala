@@ -1,5 +1,5 @@
 import { ChevronLeft } from 'lucide-react';
-import '../../navigation/top-nav-bar.css';
+import './top-nav-bar.css';
 
 export function getFirstName(fullName) {
   return fullName?.trim().split(/\s+/)[0] || '';

@@ -1,13 +1,21 @@
-const required = [
-  "NEXT_PUBLIC_APP_URL",
-  "NEXT_PUBLIC_SUPABASE_URL",
-  "NEXT_PUBLIC_SUPABASE_ANON_KEY"
-] as const;
-
-export type AppEnv = Record<(typeof required)[number], string>;
+export type AppEnv = {
+  NEXT_PUBLIC_APP_URL: string;
+  NEXT_PUBLIC_SUPABASE_URL: string;
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: string;
+};
 
 export function getEnv(): AppEnv {
-  const missing = required.filter((key) => !process.env[key]);
+  // Must use explicit property access — Next.js only statically inlines NEXT_PUBLIC_*
+  // vars when referenced by literal name, not via bracket notation.
+  const values = {
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  };
+
+  const missing = (Object.keys(values) as (keyof typeof values)[]).filter(
+    (key) => !values[key]
+  );
 
   if (missing.length > 0) {
     throw new Error(
@@ -15,9 +23,5 @@ export function getEnv(): AppEnv {
     );
   }
 
-  return {
-    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL!,
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  };
+  return values as AppEnv;
 }
