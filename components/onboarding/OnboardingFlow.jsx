@@ -6,6 +6,7 @@ import AddChildScreen from './AddChildScreen.jsx';
 import HMOCoverageScreen from './HMOCoverageScreen.jsx';
 import InviteFamilyScreen from './InviteFamilyScreen.jsx';
 import AppNavbar from '@/components/navigation/AppNavbar.jsx';
+import SkipOnboarding from './SkipOnboarding.jsx';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 import './onboarding.css';
 
@@ -426,6 +427,7 @@ export default function OnboardingFlow({ onComplete, onInitialBack }) {
   if (pendingConfirmation) {
     return (
       <div className="onboarding-flow">
+        <SkipOnboarding onComplete={handleComplete} />
         <div className="onboarding-screen">
           <div className="onboarding-screen-content">
             <div className="success-state">
@@ -471,6 +473,8 @@ export default function OnboardingFlow({ onComplete, onInitialBack }) {
         }
         onBack={step > 0 ? handleBack : onInitialBack}
       />
+
+      <SkipOnboarding onComplete={handleComplete} />
 
       {/* Screen */}
       <div className="onboarding-screen-wrapper">
