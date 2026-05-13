@@ -1,0 +1,116 @@
+/* Responsive Breakpoints */
+
+/* Mobile-first approach (base styles in component files) */
+
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 576px) {
+  .container {
+    max-width: 540px;
+  }
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) {
+  body {
+    font-size: var(--font-size-base);
+  }
+
+  .container {
+    max-width: 720px;
+    padding: 0 var(--spacing-lg);
+  }
+
+  h1 {
+    font-size: var(--font-size-4xl);
+  }
+
+  h2 {
+    font-size: var(--font-size-3xl);
+  }
+
+  h3 {
+    font-size: var(--font-size-2xl);
+  }
+}
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+  .container {
+    max-width: 960px;
+  }
+}
+
+/* Extra large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+  .container {
+    max-width: 1140px;
+  }
+}
+
+/* XXL devices (1400px and up) */
+@media (min-width: 1400px) {
+  .container {
+    max-width: 1320px;
+  }
+}
+
+/* Landscape orientation */
+@media (orientation: landscape) and (max-height: 500px) {
+  body {
+    padding: var(--spacing-sm);
+  }
+
+  h1 {
+    font-size: var(--font-size-2xl);
+    margin-bottom: var(--spacing-sm);
+  }
+}
+
+/* High resolution displays */
+@media (min-resolution: 2dppx) {
+  /* Adjust for retina displays if needed */
+}
+
+/* Touch devices */
+@media (hover: none) and (pointer: coarse) {
+  button,
+  a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: var(--color-gray-900);
+    color: var(--color-gray-50);
+  }
+
+  a {
+    color: var(--color-primary);
+  }
+}
+
+/* Print media */
+@media print {
+  body {
+    background: white;
+  }
+
+  .no-print {
+    display: none;
+  }
+}

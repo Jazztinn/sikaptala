@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output
+build/
+dist/
+*.min.js
+*.min.css
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+coverage/
+.nyc_output/
+
+# Logs
+logs/
+*.log
+
+# Cache
+.cache/
+.parcel-cache/
+
+# Service Worker (generated)
+public/service-worker-*.js
+
+# OS
+Thumbs.db
+.DS_Store

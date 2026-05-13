@@ -1,0 +1,133 @@
+/* Global Styles */
+
+body {
+  color: var(--color-primary);
+  background-color: var(--color-secondary);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+/* Typography */
+h1 {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+}
+
+h2 {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+}
+
+h3 {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+}
+
+h4 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+}
+
+h5 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+h6 {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+}
+
+p {
+  margin-bottom: var(--spacing-md);
+}
+
+small {
+  font-size: var(--font-size-sm);
+}
+
+/* Links */
+a {
+  color: var(--color-primary);
+  transition: opacity var(--transition-fast);
+}
+
+a:hover {
+  opacity: 0.8;
+}
+
+a:active {
+  opacity: 0.6;
+}
+
+/* Focus Styles */
+button:focus,
+a:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+/* Utility Classes */
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Disable text selection where needed */
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Print Styles */
+@media print {
+  body {
+    background-color: white;
+    color: black;
+  }
+
+  a {
+    text-decoration: underline;
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "sikaptala-pwa",
+  "version": "1.0.0",
+  "description": "Progressive Web App - Sikaptala",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "http-server -p 8080 -c-1",
+    "build": "echo 'Add your build script here'",
+    "test": "echo 'Add your test script here'",
+    "start": "http-server -p 8080"
+  },
+  "keywords": [
+    "pwa",
+    "progressive",
+    "web",
+    "app"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
